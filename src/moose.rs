@@ -1,23 +1,44 @@
-
-struct Area {
-    center: (i32, i32),
-    radius: i32,
-    is_rest_area: bool
+use rand::{thread_rng, Rng};
+use rand::distributions::Open01;
+use std::cmp::Ordering;
+pub struct Area {
+    pub center: (i32, i32),
+    pub radius: i32,
 }
 
 pub struct Moose {
     pub pos: (i32, i32),
     pub speed: f64,
-    pub target: (i32, i32),
-    pub rest_area_id: i32,
+    pub eat_walk_speed: f64,
+    pub target: (i32, i32)
 }
 
 impl Moose {
     fn move_to_target(&mut self) {
         let vector: (f64, f64) = ((self.target.0 - self.pos.0) as f64, (self.target.1 - self.pos.1) as f64);
-        let vector_length = (vector.0 + vector.1).sqrt();
-        let dir_vector = (vector.0 /vector_length, vector.1/vector_length);
+        let vector_length: f64 = (vector.0.powi(2) + vector.1.powi(2)).sqrt();
+        let dir_vector: (f64, f64) = (vector.0 /vector_length, vector.1/vector_length);
         self.pos = (self.pos.0 + (dir_vector.0*self.speed).round() as i32, self.pos.1 + (dir_vector.1*self.speed).round() as i32) 
+    }
+    fn choose_target(&mut self, areas: Vec<Area>) {
+        let mut inverse_squares: Vec<f64> = Vec::with_capacity(areas.len());
+        let mut inverse_sum: f64 = 0.0;
+        for area in areas {
+            let distance_squared: f64 = ((area.center.0 - self.pos.0).pow(2) + (area.center.1 - self.pos.1).pow(2)) as f64;
+            let inverse_square: f64 = 1.0/distance_squared;
+            inverse_squares.push(inverse_square);
+            inverse_sum += inverse_square;
+        }
+        let mut chance_table: Vec<f64> = Vec::with_capacity(areas.len());
+        let mut coefficient_sum: f64 = 0.0;
+        for inverse_square in inverse_squares {
+            let coefficient: f64 = inverse_square/inverse_sum;
+            chance_table.push(coefficient_sum);
+            coefficient_sum += coefficient;
+        }
+        let rand: f64 = thread_rng().sample(Open01);
+        let index: usize = chance_table.partition_point(|lower| lower<&rand) -1;
+        self.target = areas[index].center
     }
 }
 pub struct MooseChild {
