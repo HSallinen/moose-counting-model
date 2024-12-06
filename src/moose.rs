@@ -1,6 +1,6 @@
 use rand::{thread_rng, Rng};
 use rand::distributions::Open01;
-use std::cmp::Ordering;
+use crate::utils::distance_squared;
 pub struct Area {
     pub center: (i32, i32),
     pub radius: i32,
@@ -26,8 +26,8 @@ impl Moose {
     fn choose_target(&mut self, areas: Vec<Area>) {
         let mut inverse_squares: Vec<f64> = Vec::with_capacity(areas.len());
         let mut inverse_sum: f64 = 0.0;
-        for area in areas {
-            let distance_squared: f64 = ((area.center.0 - self.pos.0).pow(2) + (area.center.1 - self.pos.1).pow(2)) as f64;
+        for area in &areas {
+            let distance_squared: f64 = distance_squared(area.center, self.pos) as f64;
             let inverse_square: f64 = 1.0/distance_squared;
             inverse_squares.push(inverse_square);
             inverse_sum += inverse_square;

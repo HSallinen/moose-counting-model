@@ -1,4 +1,5 @@
 use crate::moose;
+use crate::utils::distance_squared;
 
 pub struct Drone {
     pub pos: (i32, i32),
@@ -26,10 +27,7 @@ impl Drone {
         let mut found: Vec<usize> = vec![];
 
         for (index, moose) in moose.iter().enumerate() {
-            if (moose.pos.0 - self.pos.0).pow(2)
-               + (moose.pos.1 - self.pos.1).pow(2)
-               < self.detection_range.pow(2)
-            {
+            if distance_squared(moose.pos, self.pos) < self.detection_range.pow(2) {
                 if !self.last_detected.contains(&index) {
                     acc += 1;
                 }
@@ -41,10 +39,7 @@ impl Drone {
     }
 
     fn timestep(&mut self, moose: Vec<moose::Moose>) -> i32 {
-        if (self.path[self.path_target_index].0 - self.pos.0).pow(2)
-            + (self.path[self.path_target_index].1 - self.pos.1).pow(2)
-            < 100
-        {
+        if distance_squared(self.path[self.path_target_index], self.pos) < 100 {
             self.path_target_index += 1;
         }
         let vector: (f64, f64) = ((self.path[self.path_target_index].0 - self.pos.0) as f64,
