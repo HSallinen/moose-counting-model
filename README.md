@@ -1,2 +1,2 @@
 # Running
-cargo run
+```cargo run```
