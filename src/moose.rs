@@ -13,6 +13,9 @@ pub struct Moose {
     pub target: (i32, i32)
 }
 
+pub fn moose(pos: (i32, i32), speed: f64, eat_walk_speed: f64) -> Moose {
+    Moose{pos, speed, eat_walk_speed, target:pos}
+}
 impl Moose {
     fn move_to_target(&mut self) {
         let vector: (f64, f64) = ((self.target.0 - self.pos.0) as f64, (self.target.1 - self.pos.1) as f64);
