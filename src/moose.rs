@@ -10,19 +10,33 @@ pub struct Moose {
     pub pos: (i32, i32),
     pub speed: f64,
     pub eat_walk_speed: f64,
-    pub target: (i32, i32)
+    pub target: (i32, i32),
+    pub eat_time: i32,
+    pub sleep_time: i32,
+    time_slept: i32,
+    time_eaten: i32,
+    enum current_state: {Walking, Eating, Sleeping},
+    enum next_target: {Sleep, Eat},
 }
 
-pub fn moose(pos: (i32, i32), speed: f64, eat_walk_speed: f64) -> Moose {
-    Moose{pos, speed, eat_walk_speed, target:pos}
+pub fn moose(pos: (i32, i32), speed: f64, eat_walk_speed: f64, eat_time: i32, sleep_time: i32) -> Moose {
+    Moose{pos, speed, eat_walk_speed, target:pos, eat_time, sleep_time, time_eaten: 0, time_slept: 0, sleeping: false, eating: false, next_target: Eat};
 }
 impl Moose {
-    fn move_to_target(&mut self) {
+    fn move_to_target(&mut self) -> bool{
         let vector: (f64, f64) = ((self.target.0 - self.pos.0) as f64, (self.target.1 - self.pos.1) as f64);
         let vector_length: f64 = (vector.0.powi(2) + vector.1.powi(2)).sqrt();
-        let dir_vector: (f64, f64) = (vector.0 /vector_length, vector.1/vector_length);
-        self.pos = (self.pos.0 + (dir_vector.0*self.speed).round() as i32, self.pos.1 + (dir_vector.1*self.speed).round() as i32) 
+        if vector_length < self.speed {
+            self.pos = self.target;
+            return true
+        }
+        else{
+            let dir_vector: (f64, f64) = (vector.0 /vector_length, vector.1/vector_length);
+            self.pos = (self.pos.0 + (dir_vector.0*self.speed).round() as i32, self.pos.1 + (dir_vector.1*self.speed).round() as i32) 
+            return false;
+        }
     }
+
     fn choose_target(&mut self, areas: Vec<Area>) {
         let mut inverse_squares: Vec<f64> = Vec::with_capacity(areas.len());
         let mut inverse_sum: f64 = 0.0;
@@ -44,13 +58,43 @@ impl Moose {
         self.target = areas[index].center
     }
 
-    fn random_move(&mut self) {
-        self.pos.0 += thread_rng().gen_range(-self.speed..self.speed).round() as i32;
-        self.pos.1 += thread_rng().gen_range(-self.speed..self.speed).round() as i32;
+    fn random_move(&mut self, speed: i32) {
+        self.pos.0 += thread_rng().gen_range(-speed..speed).round() as i32;
+        self.pos.1 += thread_rng().gen_range(-speed..speed).round() as i32;
     }
-    
-    pub fn timestep(&mut self, areas: Vec<Area>) {
-        random_move(self)
+
+    pub fn timestep(&mut self, eating_areas: Vec<Area>, sleeping_areas: Vec<Area>) {
+        match self.current_state {
+            Walking => { 
+                if move_to_target() {
+                    if self.next_target == Eat {
+                        self.current_state = Eating;
+                        self.time_eaten = 0;
+                    }
+                    else {
+                        self.current_state = Sleeping;
+                        self.time_slept = 0;
+                    }
+                }
+            }
+            Eating => {
+                self.time_eaten += 1;
+                random_move(self.eat_walk_speed);
+                if self.time_eaten >= self.eat_time {
+                    self.current_state = Walking;
+                    self.next_target = Sleep;
+                    self.choose_target(sleeping_areas);
+                }
+            }
+            Sleeping => {
+                self.time_slept += 1;
+                if self.time_slept >= self.sleep_time {
+                    self.current_state = Walking;
+                    self.next_target = Eat;
+                    self.choose_target(eating_areas);
+                }
+            }
+        }
     }
 
 }

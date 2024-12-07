@@ -25,7 +25,7 @@ fn main() {
 
         for _ in 0..26_000_000 {
             let pos = (rng.gen_range(0..20000), rng.gen_range(0..11000));
-            animals.push(moose::moose(pos, 4.0, 2.0));
+            animals.push(moose::moose(pos, 4.0, 2.0, 3, 3));
         }
 
         let mut counted_moose = 0;
