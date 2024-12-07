@@ -22,7 +22,7 @@ pub fn drone(pos: (i32, i32), detection_range: i32, speed: i32, path: Vec<(i32, 
 }
 
 impl Drone {
-    fn count_moose(&mut self, moose: Vec<moose::Moose>) -> i32 {
+    fn count_moose(&mut self, moose: &Vec<moose::Moose>) -> i32 {
         let mut acc = 0;
         let mut found: Vec<usize> = vec![];
 
@@ -38,8 +38,11 @@ impl Drone {
         acc
     }
 
-    fn timestep(&mut self, moose: Vec<moose::Moose>) -> i32 {
+    pub fn timestep(&mut self, moose: &Vec<moose::Moose>) -> (i32, bool) {
         if distance_squared(self.path[self.path_target_index], self.pos) < 100 {
+            if self.path_target_index == moose.len() {
+                return (self.count_moose(moose), true);
+            }
             self.path_target_index += 1;
         }
         let vector: (f64, f64) = ((self.path[self.path_target_index].0 - self.pos.0) as f64,
@@ -47,6 +50,6 @@ impl Drone {
         let vector_length = (vector.0 + vector.1).sqrt();
         let dir_vector = (vector.0 / vector_length, vector.1 / vector_length);
         self.pos = (self.pos.0 + (dir_vector.0 * self.speed as f64).round() as i32, self.pos.1 + (dir_vector.1 * self.speed as f64).round() as i32);
-        self.count_moose(moose)
+        (self.count_moose(moose), false)
     }
 }

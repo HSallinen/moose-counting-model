@@ -16,6 +16,19 @@ fn main() {
 
     for _ in 0..26_000_000 {
         let pos = (rng.gen_range(0..20000), rng.gen_range(0..11000));
-        animals.push(moose::moose(pos, 4, 2));
+        animals.push(moose::moose(pos, 4.0, 2.0));
+    }
+
+    let mut counted_moose = 0;
+    loop {
+        for mut moose in animals {
+            moose.timestep();
+        }
+        let (timestep_moose, finished) = drone.timestep(&animals);
+        if finished {
+            break;
+        } else {
+            counted_moose += timestep_moose;
+        }
     }
 }
