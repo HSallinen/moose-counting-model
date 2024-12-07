@@ -13,10 +13,10 @@ pub struct Drone {
 pub fn drone(pos: (i32, i32), detection_range: i32, speed: i32, path_len: i32) -> Drone {
     let mut path: Vec<(i32, i32)> = vec![];
     for i in 0..path_len {
-        path.push((500, i * 1000 + 500));
-        path.push((19500, i * 1000 + 500));
-        path.push((19500, i * 1000 + 1500));
-        path.push((500, i * 1000 + 1500));
+        path.push((detection_range, i * 2 * detection_range + detection_range));
+        path.push((20000 - detection_range, i * 2 * detection_range + detection_range));
+        path.push((20000 - detection_range, i * 2 * detection_range + 3 * detection_range));
+        path.push((detection_range, i * 2 * detection_range + 3 * detection_range));
     }
     Drone {
         pos,
