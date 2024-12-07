@@ -16,11 +16,16 @@ fn main() {
 
         let mut animals: Vec<Moose> = vec![];
         let mut feeding_areas: Vec<Area> = vec![];
-        let rng = rand::thread_rng();
+        let mut sleeping_areas: Vec<Area> = vec![];
+        let mut rng = rand::thread_rng();
         let mut drone = drone::drone((500, 500), 500, 10, 2);
 
         for _ in 0..rng.gen_range(10..20) {
             feeding_areas.push(Area { center: (rng.gen_range(0..20000), rng.gen_range(0..11000)), radius: rng.gen_range(0..1000)});
+        }
+
+        for _ in 0..rng.gen_range(10..20) {
+            sleeping_areas.push(Area { center: (rng.gen_range(0..20000), rng.gen_range(0..11000)), radius: rng.gen_range(0..1000)});
         }
 
         for _ in 0..26_000_000 {
@@ -31,7 +36,7 @@ fn main() {
         let mut counted_moose = 0;
         loop {
             for mut moose in animals {
-                moose.timestep();
+                moose.timestep(&feeding_areas, &sleeping_areas);
             }
             let (timestep_moose, finished) = drone.timestep(&animals);
             if finished {

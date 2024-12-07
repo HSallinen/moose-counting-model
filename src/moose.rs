@@ -6,6 +6,15 @@ pub struct Area {
     pub radius: i32,
 }
 
+pub enum MooseState {
+    Walking,
+    Eating,
+    Sleeping,
+}
+pub enum NextTarget {
+    Eat,
+    Sleep,
+}
 pub struct Moose {
     pub pos: (i32, i32),
     pub speed: f64,
@@ -15,12 +24,12 @@ pub struct Moose {
     pub sleep_time: i32,
     time_slept: i32,
     time_eaten: i32,
-    enum current_state: {Walking, Eating, Sleeping},
-    enum next_target: {Sleep, Eat},
+    current_state: MooseState,
+    next_target: NextTarget,
 }
 
 pub fn moose(pos: (i32, i32), speed: f64, eat_walk_speed: f64, eat_time: i32, sleep_time: i32) -> Moose {
-    Moose{pos, speed, eat_walk_speed, target:pos, eat_time, sleep_time, time_eaten: 0, time_slept: 0, sleeping: false, eating: false, next_target: Eat};
+    Moose{pos, speed, eat_walk_speed, target:pos, eat_time, sleep_time, time_eaten: 0, time_slept: 0,current_state: MooseState::Walking, next_target: NextTarget::Eat}
 }
 impl Moose {
     fn move_to_target(&mut self) -> bool{
@@ -37,10 +46,10 @@ impl Moose {
         }
     }
 
-    fn choose_target(&mut self, areas: Vec<Area>) {
+    fn choose_target(&mut self, areas: &Vec<Area>) {
         let mut inverse_squares: Vec<f64> = Vec::with_capacity(areas.len());
         let mut inverse_sum: f64 = 0.0;
-        for area in &areas {
+        for area in areas {
             let distance_squared: f64 = distance_squared(area.center, self.pos) as f64;
             let inverse_square: f64 = 1.0/distance_squared;
             inverse_squares.push(inverse_square);
@@ -58,39 +67,41 @@ impl Moose {
         self.target = areas[index].center
     }
 
-    fn random_move(&mut self, speed: i32) {
+    fn random_move(&mut self, speed: f64) {
         self.pos.0 += thread_rng().gen_range(-speed..speed).round() as i32;
         self.pos.1 += thread_rng().gen_range(-speed..speed).round() as i32;
     }
 
-    pub fn timestep(&mut self, eating_areas: Vec<Area>, sleeping_areas: Vec<Area>) {
+    pub fn timestep(&mut self, eating_areas: &Vec<Area>, sleeping_areas: &Vec<Area>) {
         match self.current_state {
-            Walking => { 
-                if move_to_target() {
-                    if self.next_target == Eat {
-                        self.current_state = Eating;
-                        self.time_eaten = 0;
-                    }
-                    else {
-                        self.current_state = Sleeping;
-                        self.time_slept = 0;
+            MooseState::Walking => { 
+                if self.move_to_target() {
+                    match self.next_target {    
+                        NextTarget::Eat => {
+                            self.current_state = MooseState::Eating;
+                            self.time_eaten = 0;
+                        }
+                        NextTarget::Sleep => {
+                            self.current_state = MooseState::Sleeping;
+                            self.time_slept = 0;
+                        }
                     }
                 }
             }
-            Eating => {
+            MooseState::Eating => {
                 self.time_eaten += 1;
-                random_move(self.eat_walk_speed);
+                self.random_move(self.eat_walk_speed);
                 if self.time_eaten >= self.eat_time {
-                    self.current_state = Walking;
-                    self.next_target = Sleep;
+                    self.current_state = MooseState::Walking;
+                    self.next_target = NextTarget::Sleep;
                     self.choose_target(sleeping_areas);
                 }
             }
-            Sleeping => {
+            MooseState::Sleeping => {
                 self.time_slept += 1;
                 if self.time_slept >= self.sleep_time {
-                    self.current_state = Walking;
-                    self.next_target = Eat;
+                    self.current_state = MooseState::Walking;
+                    self.next_target = NextTarget::Eat;
                     self.choose_target(eating_areas);
                 }
             }
