@@ -47,7 +47,7 @@ impl Drone {
 
     pub fn timestep(&mut self, moose: &Vec<moose::Moose>) -> (i32, bool) {
         if distance_squared(self.path[self.path_target_index], self.pos) < 100 {
-            if self.path_target_index == moose.len() {
+            if self.path_target_index == self.path.len() {
                 return (self.count_moose(moose), true);
             }
             self.path_target_index += 1;
