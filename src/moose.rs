@@ -49,8 +49,8 @@ impl Moose {
         self.pos.1 += thread_rng().gen_range(-self.speed..self.speed).round() as i32;
     }
     
-    pub fn timestep(&mut self, areas: Vec<Area>) {
-        random_move(self)
+    pub fn timestep(&mut self) {
+        self.random_move()
     }
 
 }
