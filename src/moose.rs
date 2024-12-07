@@ -44,10 +44,15 @@ impl Moose {
         self.target = areas[index].center
     }
 
-    pub fn timestep(&mut self) {
+    fn random_move(&mut self) {
         self.pos.0 += thread_rng().gen_range(-self.speed..self.speed).round() as i32;
         self.pos.1 += thread_rng().gen_range(-self.speed..self.speed).round() as i32;
     }
+    
+    pub fn timestep(&mut self, areas: Vec<Area>) {
+        random_move(self)
+    }
+
 }
 pub struct MooseChild {
     pub pos: (i32, i32),
