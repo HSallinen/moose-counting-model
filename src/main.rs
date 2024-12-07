@@ -12,12 +12,12 @@ fn main() {
         .collect();
     for params in paramsets {
         let params: Vec<&str> = params.split_whitespace().collect();
-        // moose amount, moose speed, moose eat speed, drone speed, drone range, drone path
+        // moose amount, moose speed, moose eat speed, drone speed, drone range, drone path loops
 
         let mut animals: Vec<Moose> = vec![];
         let mut feeding_areas: Vec<Area> = vec![];
         let rng = rand::thread_rng();
-        let mut drone = drone::drone((500, 500), 500, 10, vec![(500, 10500), (1500, 10500), (1500, 500)]);
+        let mut drone = drone::drone((500, 500), 500, 10, 2);
 
         for _ in 0..rng.gen_range(10..20) {
             feeding_areas.push(Area { center: (rng.gen_range(0..20000), rng.gen_range(0..11000)), radius: rng.gen_range(0..1000)});
