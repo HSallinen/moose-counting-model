@@ -43,6 +43,11 @@ impl Moose {
         let index: usize = chance_table.partition_point(|lower| lower<&rand) -1;
         self.target = areas[index].center
     }
+
+    pub fn timestep(&mut self) {
+        self.pos.0 += thread_rng().gen_range(-self.speed..self.speed).round() as i32;
+        self.pos.1 += thread_rng().gen_range(-self.speed..self.speed).round() as i32;
+    }
 }
 pub struct MooseChild {
     pub pos: (i32, i32),
